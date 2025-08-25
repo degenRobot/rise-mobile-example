@@ -1,0 +1,6 @@
+external/
+
+*.env
+
+node_modules/
+TESTING.md
