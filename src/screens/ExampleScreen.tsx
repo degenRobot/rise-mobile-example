@@ -14,7 +14,8 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+// Using AsyncStorage for demo - use SecureStore in production
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { encodeFunctionData } from 'viem';
 import type { PrivateKeyAccount } from 'viem/accounts';
 
@@ -24,13 +25,14 @@ import {
   prepareUpgradeAccount,
   upgradeAccount,
   sendTransaction,
-  generateAccount,
   createAccount,
 } from '../lib/simple-porto';
+import { generatePrivateKey } from 'viem/accounts';
 
 // Example contract (FrenPet)
-const FRENPET_ADDRESS = '0xc73341541Ad7910c31e54EFf5f1FfD893C78Cf90';
-const FRENPET_ABI = require('../abi/FrenPetSimple.json');
+const FRENPET_ADDRESS = '0x3FDE139A94eEf14C4eBa229FDC80A54f7F5Fbf25'; // Must be uppercase!
+const FRENPET_JSON = require('../abi/FrenPetSimple.json');
+const FRENPET_ABI = FRENPET_JSON.abi;
 
 export default function ExampleScreen() {
   const [account, setAccount] = useState<PrivateKeyAccount | null>(null);
@@ -48,18 +50,18 @@ export default function ExampleScreen() {
   const initializeAccount = async () => {
     try {
       // Check if we have a saved private key
-      let privateKey = await SecureStore.getItemAsync('PORTO_PRIVATE_KEY');
+      let privateKey = await AsyncStorage.getItem('PORTO_PRIVATE_KEY');
       
       if (!privateKey) {
         // Generate new account
-        const newAccount = generateAccount();
-        privateKey = newAccount.privateKey;
-        await SecureStore.setItemAsync('PORTO_PRIVATE_KEY', privateKey);
+        privateKey = generatePrivateKey();
+        await AsyncStorage.setItem('PORTO_PRIVATE_KEY', privateKey);
+        const newAccount = createAccount(privateKey as `0x${string}`);
         setAccount(newAccount);
         console.log('Created new account:', newAccount.address);
       } else {
         // Load existing account
-        const existingAccount = createAccount(privateKey as any);
+        const existingAccount = createAccount(privateKey as `0x${string}`);
         setAccount(existingAccount);
         console.log('Loaded account:', existingAccount.address);
       }

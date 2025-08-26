@@ -17,26 +17,28 @@ export const PORTO_CONFIG = {
 
 /**
  * Make a JSON-RPC call to Porto relay
+ * Simple fetch without AbortController - matches working external/mobile-demo pattern
  */
 export async function relayCall(method: string, params: any[]): Promise<any> {
+  const requestId = Math.floor(Math.random() * 10000);
+  
   const response = await fetch(PORTO_CONFIG.relayUrl, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       jsonrpc: '2.0',
       method,
       params,
-      id: Date.now(),
+      id: requestId,
     }),
   });
 
-  const data = await response.json();
-  if (data.error) {
-    throw new Error(`RPC Error: ${data.error.message}`);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
-  return data.result;
+
+  const result = await response.json();
+  return result;
 }
 
 /**
@@ -56,7 +58,8 @@ export function serializePublicKey(address: string): string {
  * Check Porto health
  */
 export async function checkHealth(): Promise<string> {
-  return await relayCall('health', []);
+  const response = await relayCall('health', []);
+  return response.result;
 }
 
 /**
@@ -86,7 +89,8 @@ export async function prepareUpgradeAccount(
     chainId: PORTO_CONFIG.chainId
   };
 
-  return await relayCall('wallet_prepareUpgradeAccount', [params]);
+  const response = await relayCall('wallet_prepareUpgradeAccount', [params]);
+  return response.result;
 }
 
 /**
@@ -128,7 +132,7 @@ export async function prepareCalls(
   };
 
   // Include key in the request like the working test
-  return await relayCall('wallet_prepareCalls', [{
+  const response = await relayCall('wallet_prepareCalls', [{
     ...params,
     key: {
       prehash: false,
@@ -136,6 +140,7 @@ export async function prepareCalls(
       type: 'secp256k1'
     }
   }]);
+  return response.result;
 }
 
 /**
@@ -147,17 +152,30 @@ export async function sendPreparedCalls(
 ): Promise<{ id: string }> {
   const signature = await account.sign({ hash: prepareResult.digest });
 
-  return await relayCall('wallet_sendPreparedCalls', [{
+  const response = await relayCall('wallet_sendPreparedCalls', [{
     context: prepareResult.context,
+    key: {
+      prehash: false,
+      publicKey: serializePublicKey(account.address),
+      type: 'secp256k1'
+    },
     signature
   }]);
+  
+  // response.result should have the bundle ID
+  // It might be { id: string } or just a string
+  if (typeof response.result === 'string') {
+    return { id: response.result };
+  }
+  return response.result;
 }
 
 /**
  * Get transaction status
  */
 export async function getCallsStatus(bundleId: string): Promise<any> {
-  return await relayCall('wallet_getCallsStatus', [bundleId]);
+  const response = await relayCall('wallet_getCallsStatus', [bundleId]);
+  return response.result;
 }
 
 /**
