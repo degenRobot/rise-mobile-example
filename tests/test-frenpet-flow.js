@@ -10,12 +10,12 @@ import {
   prepareUpgradeAccount,
   upgradeAccount,
   sendTransaction
-} from '../src/lib/simple-porto.ts';
+} from '../app/src/lib/simple-porto.ts';
 import { encodeFunctionData, createPublicClient, http } from 'viem';
 import fs from 'fs';
 
 const FRENPET_ADDRESS = '0x3FDE139A94eEf14C4eBa229FDC80A54f7F5Fbf25';
-const FRENPET_JSON = JSON.parse(fs.readFileSync(new URL('../src/abi/FrenPetSimple.json', import.meta.url)));
+const FRENPET_JSON = JSON.parse(fs.readFileSync(new URL('../app/src/abi/FrenPetSimple.json', import.meta.url)));
 const FRENPET_ABI = FRENPET_JSON.abi;
 
 const rpcClient = createPublicClient({

@@ -17,7 +17,7 @@ const CONFIG = {
 const FRENPET_ADDRESS = '0x3FDE139A94eEf14C4eBa229FDC80A54f7F5Fbf25'; // Uppercase!
 const ETH_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-const FrenPetABI = JSON.parse(fs.readFileSync(new URL('../src/abi/FrenPetSimple.json', import.meta.url)));
+const FrenPetABI = JSON.parse(fs.readFileSync(new URL('../app/src/abi/FrenPetSimple.json', import.meta.url)));
 
 async function makeRelayCall(method, params) {
   const response = await fetch(CONFIG.PORTO_URL, {
