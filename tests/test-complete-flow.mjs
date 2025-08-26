@@ -11,13 +11,13 @@ import fs from 'fs';
 const CONFIG = {
   PORTO_URL: 'https://rise-testnet-porto.fly.dev',
   CHAIN_ID: 11155931,
-  DELEGATION_PROXY: '0xf463d5cbc64916caa2775a8e9b264f8c35f4b8a4',
+  DELEGATION_PROXY: '0x894C14A66508D221A219Dd0064b4A6718d0AAA52', // Updated proxy address
 };
 
 const FRENPET_ADDRESS = '0x3FDE139A94eEf14C4eBa229FDC80A54f7F5Fbf25'; // Uppercase!
 const ETH_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-const FrenPetABI = JSON.parse(fs.readFileSync(new URL('../FrenPetSimple.json', import.meta.url)));
+const FrenPetABI = JSON.parse(fs.readFileSync(new URL('../src/abi/FrenPetSimple.json', import.meta.url)));
 
 async function makeRelayCall(method, params) {
   const response = await fetch(CONFIG.PORTO_URL, {

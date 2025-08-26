@@ -10,8 +10,8 @@ import type { Hex, Address } from 'viem';
 export const PORTO_CONFIG = {
   relayUrl: 'https://rise-testnet-porto.fly.dev',
   chainId: 11155931,
-  proxy: '0xf463d5cbc64916caa2775a8e9b264f8c35f4b8a4' as Address, // delegation_proxy
-  orchestrator: '0x046832405512d508b873e65174e51613291083bc' as Address, // orchestrator
+  proxy: '0x894C14A66508D221A219Dd0064b4A6718d0AAA52' as Address, // delegation_proxy (UPDATED!)
+  orchestrator: '0xa4D0537eEAB875C9a880580f38862C1f946bFc1c' as Address, // orchestrator (UPDATED!)
   ethAddress: '0x0000000000000000000000000000000000000000' as Address, // ETH for gasless
 };
 
@@ -115,15 +115,21 @@ export async function upgradeAccount(
  */
 export async function prepareCalls(
   account: PrivateKeyAccount,
-  calls: Array<{ to: Address; data: Hex; value: Hex }>
+  calls: Array<{ to: Address | string; data: Hex; value: Hex }>
 ): Promise<{
   digest: Hex;
   context: any;
 }> {
+  // Make sure addresses are lowercase for Porto
+  const formattedCalls = calls.map(call => ({
+    ...call,
+    to: call.to.toLowerCase() as Address
+  }));
+  
   const params = {
     from: account.address,
     chainId: PORTO_CONFIG.chainId,
-    calls,
+    calls: formattedCalls,
     capabilities: {
       meta: {
         feeToken: PORTO_CONFIG.ethAddress // For gasless
